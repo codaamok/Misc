@@ -1,16 +1,16 @@
 ﻿function New-DummyFolderStructure { 
     Param(
         [string]$Path,
-        [int]$Long,
-        [int]$Deep
+        [int]$Long
     )
-    For($LongCounter = 0; $LongCounter -lt $Long; $LongCounter++) {
+    while ($Long -gt 0) {
         $Folder = ([guid]::NewGuid()).Guid
-        $NewDir = New-Item -ItemType Directory -Path "$Path\$Folder"
-        while ($Deep -gt 1) {
-            $Folder = ([guid]::NewGuid()).Guid
-            $NewDir = New-Item -ItemType Directory -Path "$NewDir\$Folder"
-            $Deep--
+        Try {
+            New-Item -ItemType Directory -Path "$Path\$Folder" | Out-Null
         }
-    }
+        Catch {
+            Write-Error "Unable to create $Path\$Folder"
+        }
+        $Long--
+    }  
 }
