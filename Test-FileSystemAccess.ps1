@@ -47,8 +47,8 @@ Function Test-FileSystemAccess {
                 # If reached this point, then $Rights was not determined by enumerating the ACL
                 # Unless the user is in Administrators group and Administrators group is delegated $Rights but process wasn't elevated to be able to find out
 
-                # If process is not elevated, if user is in Administrators group and Administrators group has $AccessRights
-                If (($IsElevated -eq $false)  -And ($currentIdentity.Groups.Value -contains "S-1-5-32-544") -And ($rules | Where-Object { $_.IdentityReference -eq "S-1-5-32-544" -And $_.HasFlag($Rights)})) {
+                # If process is not elevated and Administrators group has $AccessRights
+                If (($IsElevated -eq $false) -And ($rules | Where-Object { ($_.IdentityReference -eq "S-1-5-32-544") -And ($_.FileSystemRights -eq $Rights)})) {
                     return 740
                 }
                 Else {
@@ -71,3 +71,5 @@ Function Test-FileSystemAccess {
         return 3
     }
 }
+
+Test-FileSystemAccess -Path "C:\Users\acc\Documents\New folder\1" -Rights FullControl
