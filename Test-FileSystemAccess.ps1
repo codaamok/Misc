@@ -42,7 +42,7 @@ Function Test-FileSystemAccess {
                     }
                 }
 
-                if (($IsElevated -eq $false) -And ($rules.Where( { ($_.IdentityReference -eq "S-1-5-32-544") -And ($_.FileSystemRights -eq $Rights) } ))
+                if (($IsElevated -eq $false) -And ($rules.Where( { ($_.IdentityReference -eq "S-1-5-32-544") -And ($_.FileSystemRights -eq $Rights) } )))
                 {
                     return 740
                 }
