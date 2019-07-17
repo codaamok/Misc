@@ -8,17 +8,19 @@ Function Test-FileSystemAccess {
     Called by main body.
     .OUTPUTS
     System.Int32
-    0 = ERROR_SUCCESS
-    5 = ERROR_ACCESS_DENIED
-    3 = ERROR_PATH_NOT_FOUND
+    0   = ERROR_SUCCESS
+    3   = ERROR_PATH_NOT_FOUND
+    5   = ERROR_ACCESS_DENIED
+    740 = ERROR_ELEVATION_REQUIRED
+    .NOTES
+        Authors:    Patrick Seymour / Adam Cook
+        Contact:    @codaamok
     #>
     param
     (
         [string]$Path,
         [System.Security.AccessControl.FileSystemRights]$Rights
     )
-
-    # Thanks to Patrick in Windows Admins slack
 
     [System.Security.Principal.WindowsIdentity]$currentIdentity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
     [System.Security.Principal.WindowsPrincipal]$currentPrincipal = New-Object Security.Principal.WindowsPrincipal($currentIdentity)
@@ -44,14 +46,12 @@ Function Test-FileSystemAccess {
                     }
                 }
 
-                # If reached this point, then $Rights was not determined by enumerating the ACL
-                # Unless the user is in Administrators group and Administrators group is delegated $Rights but process wasn't elevated to be able to find out
-
-                # If process is not elevated and Administrators group has $AccessRights
-                If (($IsElevated -eq $false) -And ($rules | Where-Object { ($_.IdentityReference -eq "S-1-5-32-544") -And ($_.FileSystemRights -eq $Rights)})) {
+                if (($IsElevated -eq $false) -And ($rules.Where( { ($_.IdentityReference -eq "S-1-5-32-544") -And ($_.FileSystemRights -eq $Rights) } ))
+                {
                     return 740
                 }
-                Else {
+                else
+                {
                     return 5
                 }
 
@@ -71,5 +71,3 @@ Function Test-FileSystemAccess {
         return 3
     }
 }
-
-Test-FileSystemAccess -Path "C:\Users\acc\Documents\New folder\1" -Rights FullControl
