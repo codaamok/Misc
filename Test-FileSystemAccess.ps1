@@ -1,11 +1,7 @@
 Function Test-FileSystemAccess {
     <#
     .SYNOPSIS
-    Check for read access on a given folder.
-    .DESCRIPTION
-    This is a very fast method of checking for read access on $Path by pulling access rules and comparing it to the ID to the user's context running this cricket.
-    I can not take any credit for this function. Huge thanks to Patrick in WinAdmins Slack!
-    Called by main body.
+    Check for file system access on a given folder.
     .OUTPUTS
     System.Int32
     0   = ERROR_SUCCESS
