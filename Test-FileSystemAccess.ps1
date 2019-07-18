@@ -14,13 +14,29 @@ Function Test-FileSystemAccess {
     #>
     param
     (
+        [ValidateScript({Test-Path $_ -PathType "Container"})]
+        [Parameter(Mandatory=$true)]
         [string]$Path,
+        [Parameter(Mandatory=$true)]
         [System.Security.AccessControl.FileSystemRights]$Rights
     )
 
     [System.Security.Principal.WindowsIdentity]$currentIdentity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
     [System.Security.Principal.WindowsPrincipal]$currentPrincipal = New-Object Security.Principal.WindowsPrincipal($currentIdentity)
     $IsElevated = $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    $IsInAdministratorsGroup = $currentIdentity.Claims.Value -contains "S-1-5-32-544"
+
+    switch ($Rights) {
+        "FullControl" {
+            $Rights = @("FullControl")
+        }
+        "Modify" {
+            $Rights = @("FullControl", "Modify")
+        }
+        "Read" {
+            $Rights = @("FullControl", "Modify", "Read")
+        }
+    }
 
     if ([System.IO.Directory]::Exists($Path))
     {
@@ -42,7 +58,7 @@ Function Test-FileSystemAccess {
                     }
                 }
 
-                if (($IsElevated -eq $false) -And ($rules.Where( { ($_.IdentityReference -eq "S-1-5-32-544") -And ($_.FileSystemRights -eq $Rights) } )))
+                if (($IsElevated -eq $false) -And ($IsInAdministratorsGroup -eq $true) -And ($rules.Where( { ($_.IdentityReference -eq "S-1-5-32-544") -And ($Rights -contains $_.FileSystemRights) } )))
                 {
                     return 740
                 }
@@ -67,3 +83,5 @@ Function Test-FileSystemAccess {
         return 3
     }
 }
+
+Test-FileSystemAccess -Path "C:\Users\acc\Documents\New folder\1" -Rights Read
